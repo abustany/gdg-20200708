@@ -1,0 +1,88 @@
+Traveling in time while debugging using rr
+
+Adrien Bustany
+8 Jul 2020
+
+* Me
+
+Backend engineer at Back
+
+.image back_192.png
+
+🙋 We're hiring ML engineers!
+
+📨 adrien.bustany@backhq.com
+🏭 https://www.backhq.com/
+💻 https://www.github.com/abustany/
+
+* Approaches to debugging
+
+* When things go wrong...
+
+1. What is going wrong?
+2. How did we get there?
+
+* Print calls all over the place
+
+- easy to set up
+- not always practical
+- can be done in production
+
+* Debugger
+
+- slightly higher setup cost
+- potentially high overhead
+- OK for stepping but gets painful if lots of breakpoints
+- not really doable in production
+
+* What if we could run once, but debug many times?
+
+* Recording debugger (rr)
+
+[[https://rr-project.org/]]
+
+Idea: record once, replay many times
+
+- developed by Mozilla for Firefox -> scales to larger programs
+- low overhead (less than 20% according to their website)
+- no special system setup required
+
+* How do you record a program?
+
+* Record the complete program execution
+
+- Need to run the program on a "virtual" CPU (like Valgrind)
+- High overhead
+
+* Only record the side effects of the program
+
+Two classes of code:
+- Code that has no side effects (only depends on inputs)
+- Code that interacts with the outside world
+
+Idea:
+- Record all interactions with the outside world in a trace
+- Allow running the process in a "sandbox" that replays this trace whenever the program interacts with the outside world
+ 
+Advantages:
+- Much lower overhead
+- No need to instrument/decompile the binary
+
+* rr in practice
+
+  # records the execution and saves the trace on disk
+  rr ./build/my-binary
+
+  # starts GDB against a replay of the trace
+  rr replay [OPTIONAL PATH OF TRACE TO REPLAY]
+  # or
+  dlv replay [PATH OF TRACE TO REPLAY]
+
+* rr shines for...
+
+- easily replaying incoming/outgoing network requests
+- debugging non deterministic code
+- debugging race conditions
+- finding the root cause of a complex chain of events causing a bug
+
+* Demo
